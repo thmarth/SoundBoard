@@ -22,14 +22,14 @@ namespace SoundBoard
 	public partial class MainWindow : Window
 	{
 		private Settings settings;
-		private MediaPlayer mediaPlayer;
+		private MusicPlayer mediaPlayer;
 
 		public MainWindow()
 		{
 			InitializeComponent();
 
 			settings = new Settings();
-			mediaPlayer = new MediaPlayer(settings);
+			mediaPlayer = new MusicPlayer(settings);
 
 			UpdateComponents();
 		}
