@@ -1,0 +1,57 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SoundBoard"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="SoundBoard.ButtonEdit"
+        mc:Ignorable="d"
+        Title="Button Editor" Height="350" Width="300" ResizeMode="NoResize" Topmost="True" WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Window.Resources>
+    <Grid>
+        <StackPanel Margin="10,10,10,10">
+            <Border BorderBrush="Black" BorderThickness="1" Height="Auto">
+                <Grid Height="100">
+                    <Label x:Name="backgroundLabel" Content="Background:" FontSize="21.333" HorizontalAlignment="Left" Width="127" Height="38" VerticalAlignment="Top"/>
+                    <RadioButton x:Name="backgroundTypeImage" GroupName="BackgroundType" Content="Image" HorizontalAlignment="Left" Margin="10,43,0,0" VerticalAlignment="Top" IsChecked="True"/>
+                    <RadioButton x:Name="backgroundTypeColor" GroupName="BackgroundType" Content="Solid Color" HorizontalAlignment="Right" Margin="0,43,10,0" VerticalAlignment="Top"/>
+                    <Grid Margin="10,65,10,10" Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=backgroundTypeImage}">
+                        <TextBox x:Name="backgroundUri" Margin="1,1,0,1" HorizontalAlignment="Left" Width="220"/>
+                        <Button HorizontalAlignment="Right" Margin="0,1,1,1" VerticalAlignment="Top" Click="backgroundImage_Click">
+                            <Image Source="Icons/Folder_6221.ico" />
+                        </Button>
+                    </Grid>
+                    <xctk:ColorPicker x:Name="backgroundColor" Margin="10,63,10,10" Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=backgroundTypeColor}"/>
+                </Grid>
+            </Border>
+            <Separator Height="5" Margin="0" Visibility="Hidden"/>
+            <Border BorderBrush="Black" BorderThickness="1" Height="Auto">
+                <Grid Height="75" Margin="0,0,2,0">
+                    <Label x:Name="foregroundColorLabel" Content="Foreground:" FontSize="21.333" HorizontalAlignment="Left" Width="123" Height="35" VerticalAlignment="Top"/>
+                    <xctk:ColorPicker x:Name="foregroundColor" Margin="0,10,10,0" HorizontalAlignment="Right" Width="132" Height="25" VerticalAlignment="Top"/>
+                    <TextBox x:Name="foregroundText" Margin="10,0,10,10" Height="25" VerticalAlignment="Bottom"/>
+                </Grid>
+            </Border>
+            <Separator Height="5" Margin="0" Visibility="Hidden"/>
+            <Border BorderBrush="Black" BorderThickness="1" Height="Auto">
+                <Grid Height="75" Margin="0,0,2,0">
+                    <Label x:Name="musicfileLabel" Content="Music File:" FontSize="21.333" HorizontalAlignment="Left" Width="123" Height="35" VerticalAlignment="Top"/>
+                    <Grid Margin="10,40,10,10">
+                        <TextBox x:Name="musicfileUri" Margin="1,1,0,1" HorizontalAlignment="Left" Width="220"/>
+                        <Button HorizontalAlignment="Right" Margin="0,1,1,1" VerticalAlignment="Top" Click="musicfile_Click">
+                            <Image Source="Icons/Folder_6221.ico" />
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Border>
+            <Separator Height="5" Margin="0" Visibility="Hidden"/>
+            <Grid Height="30">
+                <Button Margin="25,5,0,5" Content="Save" HorizontalAlignment="Left" Width="60" Click="buttonOK_Click"/>
+                <Button Margin="0,5,25,5" Content="Cancel" HorizontalAlignment="Right" Width="60" Click="buttonCancel_Click"/>
+            </Grid>
+        </StackPanel>
+
+    </Grid>
+</Window>
