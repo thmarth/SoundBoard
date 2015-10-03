@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -29,33 +30,46 @@ namespace SoundBoard
 
 		public void Load()
 		{
-			Load(filename);
+			if (File.Exists(filename))
+			{
+				try
+				{
+					cfg = Configuration.LoadFromFile(filename);
+				}
+				catch (ParserException)
+				{
+					MessageBoxResult result = MessageBox.Show("An error occured during loading of the configuration.\nDo you want to generate a new blank configuration?", "Configuration Error", MessageBoxButton.OKCancel, MessageBoxImage.Error);
+					if (result == MessageBoxResult.OK)
+						cfg = new Configuration();
+					else
+						Environment.Exit(1);
+				}
+			}
+			else
+				cfg = new Configuration();
+
+			VerifyConfiguration();
+			Save();
 		}
 
 		public void Load(String filename)
 		{
 			this.filename = filename;
-			if (File.Exists(this.filename))
-				cfg = Configuration.LoadFromFile(this.filename);
-			else
-				cfg = new Configuration();
-
-			VerifySettingsFile(ref cfg);
-			Save();
+			Load();
 		}
 
 		public void Save()
 		{
-			Save(filename);
+			cfg.SaveToFile(filename);
 		}
 
 		public void Save(String filename)
 		{
 			this.filename = filename;
-			cfg.SaveToFile(this.filename);
+			Save();
 		}
 
-		private void VerifySettingsFile(ref Configuration cfg)
+		private void VerifyConfiguration()
 		{
 			if (!cfg.Contains("General"))
 				cfg.Add(new Section("General"));
