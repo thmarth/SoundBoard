@@ -73,8 +73,11 @@ namespace SoundBoard
 		{
 			if (!cfg.Contains("General"))
 				cfg.Add(new Section("General"));
-
 			cfg["General"] = VerifyGeneral(cfg["General"]);
+
+			if (!cfg.Contains("Screen"))
+				cfg.Add(new Section("Screen"));
+			cfg["Screen"] = VerifyScreen(cfg["Screen"]);
 
 			for (int i = 1; i <= cfg["General"]["Rows"].IntValue; i++)
 			{
@@ -96,6 +99,41 @@ namespace SoundBoard
 
 			if (!section.Contains("Columns"))
 				section.Add(new Setting("Columns", "3"));
+
+			return section;
+		}
+
+		private Section VerifyScreen(Section section)
+		{
+			if (!section.Contains("Height"))
+				section.Add(new Setting("Height", "0"));
+
+			if (!section.Contains("Width"))
+				section.Add(new Setting("Width", "0"));
+
+			if (!section.Contains("Top"))
+				section.Add(new Setting("Top", "0"));
+
+			if (!section.Contains("Left"))
+				section.Add(new Setting("Left", "0"));
+
+			if (section["Height"].DoubleValue != 0 && section["Height"].DoubleValue > SystemParameters.VirtualScreenHeight)
+				section["Height"].DoubleValue = SystemParameters.VirtualScreenHeight;
+
+			if (section["Width"].DoubleValue != 0 && section["Width"].DoubleValue > SystemParameters.VirtualScreenWidth)
+				section["Width"].DoubleValue = SystemParameters.VirtualScreenWidth;
+
+			if (section["Top"].DoubleValue != 0 && ((section["Top"].DoubleValue + section["Height"].DoubleValue) / 2) > (SystemParameters.VirtualScreenHeight - section["Height"].DoubleValue))
+				section["Top"].DoubleValue = (SystemParameters.VirtualScreenHeight - section["Height"].DoubleValue);
+
+			if (section["Left"].DoubleValue != 0 && ((section["Left"].DoubleValue + section["Width"].DoubleValue) / 2) > (SystemParameters.VirtualScreenWidth - section["Width"].DoubleValue))
+				section["Left"].DoubleValue = (SystemParameters.VirtualScreenWidth - section["Width"].DoubleValue);
+
+			if (section["Top"].DoubleValue < 0)
+				section["Top"].DoubleValue = 1;
+
+			if (section["Left"].DoubleValue < 0)
+				section["Left"].DoubleValue = 1;
 
 			return section;
 		}
@@ -145,6 +183,16 @@ namespace SoundBoard
 		public void SetInt(String section, String key, int value)
 		{
 			cfg[section][key].IntValue = value;
+		}
+
+		public double GetDouble(String section, String key)
+		{
+			return cfg[section][key].DoubleValue;
+		}
+
+		public void SetDouble(String section, String key, double value)
+		{
+			cfg[section][key].DoubleValue = value;
 		}
 
 		public String GetString(String section, String key)

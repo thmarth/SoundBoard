@@ -31,7 +31,24 @@ namespace SoundBoard
 			settings = new Settings();
 			mediaPlayer = new MusicPlayer(settings);
 
+			WindowUpdate();
+
 			UpdateComponents();
+		}
+
+		private void WindowUpdate()
+		{
+			if (settings.GetDouble("Screen", "Height") != 0)
+				this.Height = settings.GetDouble("Screen", "Height");
+
+			if (settings.GetDouble("Screen", "Width") != 0)
+				this.Width = settings.GetDouble("Screen", "Width");
+
+			if (settings.GetDouble("Screen", "Top") != 0)
+				this.Top = settings.GetDouble("Screen", "Top");
+
+			if (settings.GetDouble("Screen", "Left") != 0)
+				this.Left = settings.GetDouble("Screen", "Left");
 		}
 
 		private void UpdateComponents()
@@ -88,6 +105,15 @@ namespace SoundBoard
 		private void Fade_Click(object sender, RoutedEventArgs e)
 		{
 			new AboutBox().ShowDialog();
+		}
+
+		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			settings.SetDouble("Screen", "Height", this.Height);
+			settings.SetDouble("Screen", "Width", this.Width);
+			settings.SetDouble("Screen", "Top", this.Top);
+			settings.SetDouble("Screen", "Left", this.Left);
+			settings.Save();
 		}
 	}
 }

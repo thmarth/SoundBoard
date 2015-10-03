@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:SoundBoard"
         xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="SoundBoard.MainWindow"
         mc:Ignorable="d"
-        Title="SoundBoard" Height="400" Width="600" MinHeight="400" MinWidth="600">
+        Title="SoundBoard" Height="400" Width="600" MinHeight="400" MinWidth="600" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
