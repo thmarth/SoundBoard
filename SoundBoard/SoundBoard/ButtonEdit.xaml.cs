@@ -38,6 +38,8 @@ namespace SoundBoard
 
 			foregroundColor.SelectedColor = settings.GetColor(target, "Foreground");
 			foregroundText.Text = settings.GetString(target, "Text");
+
+			musicfileUri.Text = settings.GetString(target, "File");
 		}
 
 		private void backgroundImage_Click(object sender, RoutedEventArgs e)

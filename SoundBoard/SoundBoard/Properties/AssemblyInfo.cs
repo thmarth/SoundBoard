@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("SoundBoard")]
 [assembly: AssemblyDescription("A simple soundboard primarily for use in sports")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Webdesign & PC Service")]
+[assembly: AssemblyCompany("Webdesign && PC Service")]
 [assembly: AssemblyProduct("SoundBoard")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]

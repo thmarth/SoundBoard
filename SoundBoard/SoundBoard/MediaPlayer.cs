@@ -3,20 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
 
 namespace SoundBoard
 {
-	class MediaPlayer
+	class MusicPlayer
 	{
-		Dictionary<String, System.Windows.Media.MediaPlayer> mediaPlayers = new Dictionary<string, System.Windows.Media.MediaPlayer>();
+		Dictionary<String, MediaPlayer> mediaPlayers = new Dictionary<string, MediaPlayer>();
 
-		public MediaPlayer(Settings settings)
+		public MusicPlayer(Settings settings)
 		{
 			for (int i = 1; i <= settings.GetInt("General", "Rows"); i++)
 			{
 				for (int j = 1; j <= settings.GetInt("General", "Columns"); j++)
 				{
-					mediaPlayers.Add("Button" + i + j, new System.Windows.Media.MediaPlayer());
+					mediaPlayers.Add("Button" + i + j, new MediaPlayer());
 					Load("Button" + i + j, settings.GetString("Button" + i + j, "File"));
 				}
 			}
@@ -24,7 +26,7 @@ namespace SoundBoard
 
 		public void Stop()
 		{
-			foreach (KeyValuePair<String, System.Windows.Media.MediaPlayer> entry in mediaPlayers)
+			foreach (KeyValuePair<String, MediaPlayer> entry in mediaPlayers)
 			{
 				entry.Value.Stop();
 			}
@@ -40,7 +42,7 @@ namespace SoundBoard
 				}
 				catch (UriFormatException)
 				{
-					System.Windows.MessageBox.Show("Error loading " + path + " for " + button, "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+					MessageBox.Show("Error loading " + path + " for " + button, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 				}
 			}
 		}

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -29,38 +30,54 @@ namespace SoundBoard
 
 		public void Load()
 		{
-			Load(filename);
+			if (File.Exists(filename))
+			{
+				try
+				{
+					cfg = Configuration.LoadFromFile(filename);
+				}
+				catch (ParserException)
+				{
+					MessageBoxResult result = MessageBox.Show("An error occured during loading of the configuration.\nDo you want to generate a new blank configuration?", "Configuration Error", MessageBoxButton.OKCancel, MessageBoxImage.Error);
+					if (result == MessageBoxResult.OK)
+						cfg = new Configuration();
+					else
+						Environment.Exit(1);
+				}
+			}
+			else
+				cfg = new Configuration();
+
+			VerifyConfiguration();
+			Save();
 		}
 
 		public void Load(String filename)
 		{
 			this.filename = filename;
-			if (File.Exists(this.filename))
-				cfg = Configuration.LoadFromFile(this.filename);
-			else
-				cfg = new Configuration();
-
-			VerifySettingsFile(ref cfg);
-			Save();
+			Load();
 		}
 
 		public void Save()
 		{
-			Save(filename);
+			cfg.SaveToFile(filename);
 		}
 
 		public void Save(String filename)
 		{
 			this.filename = filename;
-			cfg.SaveToFile(this.filename);
+			Save();
 		}
 
-		private void VerifySettingsFile(ref Configuration cfg)
+		private void VerifyConfiguration()
 		{
 			if (!cfg.Contains("General"))
 				cfg.Add(new Section("General"));
-
 			cfg["General"] = VerifyGeneral(cfg["General"]);
+
+			if (!cfg.Contains("Screen"))
+				cfg.Add(new Section("Screen"));
+			cfg["Screen"] = VerifyScreen(cfg["Screen"]);
 
 			for (int i = 1; i <= cfg["General"]["Rows"].IntValue; i++)
 			{
@@ -82,6 +99,41 @@ namespace SoundBoard
 
 			if (!section.Contains("Columns"))
 				section.Add(new Setting("Columns", "3"));
+
+			return section;
+		}
+
+		private Section VerifyScreen(Section section)
+		{
+			if (!section.Contains("Height"))
+				section.Add(new Setting("Height", "0"));
+
+			if (!section.Contains("Width"))
+				section.Add(new Setting("Width", "0"));
+
+			if (!section.Contains("Top"))
+				section.Add(new Setting("Top", "0"));
+
+			if (!section.Contains("Left"))
+				section.Add(new Setting("Left", "0"));
+
+			if (section["Height"].DoubleValue != 0 && section["Height"].DoubleValue > SystemParameters.VirtualScreenHeight)
+				section["Height"].DoubleValue = SystemParameters.VirtualScreenHeight;
+
+			if (section["Width"].DoubleValue != 0 && section["Width"].DoubleValue > SystemParameters.VirtualScreenWidth)
+				section["Width"].DoubleValue = SystemParameters.VirtualScreenWidth;
+
+			if (section["Top"].DoubleValue != 0 && ((section["Top"].DoubleValue + section["Height"].DoubleValue) / 2) > (SystemParameters.VirtualScreenHeight - section["Height"].DoubleValue))
+				section["Top"].DoubleValue = (SystemParameters.VirtualScreenHeight - section["Height"].DoubleValue);
+
+			if (section["Left"].DoubleValue != 0 && ((section["Left"].DoubleValue + section["Width"].DoubleValue) / 2) > (SystemParameters.VirtualScreenWidth - section["Width"].DoubleValue))
+				section["Left"].DoubleValue = (SystemParameters.VirtualScreenWidth - section["Width"].DoubleValue);
+
+			if (section["Top"].DoubleValue < 0)
+				section["Top"].DoubleValue = 1;
+
+			if (section["Left"].DoubleValue < 0)
+				section["Left"].DoubleValue = 1;
 
 			return section;
 		}
@@ -131,6 +183,16 @@ namespace SoundBoard
 		public void SetInt(String section, String key, int value)
 		{
 			cfg[section][key].IntValue = value;
+		}
+
+		public double GetDouble(String section, String key)
+		{
+			return cfg[section][key].DoubleValue;
+		}
+
+		public void SetDouble(String section, String key, double value)
+		{
+			cfg[section][key].DoubleValue = value;
 		}
 
 		public String GetString(String section, String key)
