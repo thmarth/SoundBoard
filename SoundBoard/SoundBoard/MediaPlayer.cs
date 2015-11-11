@@ -18,8 +18,9 @@ namespace SoundBoard
 			{
 				for (int j = 1; j <= settings.GetInt("General", "Columns"); j++)
 				{
-					mediaPlayers.Add("Button" + i + j, new MediaPlayer());
-					Load("Button" + i + j, settings.GetString("Button" + i + j, "File"));
+                    String button = "Button" + i + j + "P" + settings.GetString("Profile", "Profile");
+                    mediaPlayers.Add(button, new MediaPlayer());
+					Load(button, settings.GetString(button, "File"));
 				}
 			}
 		}

@@ -33,7 +33,9 @@
                 <CheckBox x:Name="checkBox" Margin="5,75,15,5" Content="Edit mode" HorizontalAlignment="Right" />
             </Grid>
         </Grid>
-        <Border BorderBrush="Black" BorderThickness="2" Margin="5" />
+        <Border BorderBrush="Black" BorderThickness="2" Margin="5" >
+            <ComboBox x:Name="comboBoxProfile" Margin="466,8,8,56" DropDownClosed="SetProfile"/>
+        </Border>
 
         <Grid Grid.Row="1">
             <Grid.RowDefinitions>
