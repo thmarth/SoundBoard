@@ -115,6 +115,16 @@ namespace SoundBoard
             return section;
         }
 
+        internal void RenameSection(string oldName, string newName)
+        {
+            cfg[oldName].Name = newName;
+        }
+
+        internal void RemoveSection(string name)
+        {
+            cfg.Remove(name);
+        }
+
         private Section VerifyGeneral(Section section)
 		{
 			if (!section.Contains("Rows"))

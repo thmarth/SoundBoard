@@ -55,10 +55,17 @@ namespace SoundBoard
 		{
             InitializeButtons();
 
+            InitializeProfileDropdown();
+		}
+
+        private void InitializeProfileDropdown()
+        {
+            comboBoxProfile.Items.Clear();
             foreach (String profile in settings.GetProfiles())
                 comboBoxProfile.Items.Add(profile);
+            comboBoxProfile.Items.Add("<Edit...>");
             comboBoxProfile.SelectedIndex = settings.GetInt("Profile", "Profile");
-		}
+        }
 
         private void InitializeButtons()
         {
@@ -129,7 +136,20 @@ namespace SoundBoard
 
         private void SetProfile(object sender, EventArgs e)
         {
-            settings.SetString("Profile", "Profile", (sender as ComboBox).SelectedIndex.ToString());
+            if ((sender as ComboBox).SelectedIndex == settings.GetProfiles().Length)
+            {
+                ProfileEdit profileEditor = new ProfileEdit(settings);
+                profileEditor.Owner = this;
+                profileEditor.ShowDialog();
+                settings.SetString("Profile", "Profile", 0.ToString());
+                InitializeProfileDropdown();
+                settings.Save();
+                settings = new Settings();
+            }
+            else
+            {
+                settings.SetString("Profile", "Profile", (sender as ComboBox).SelectedIndex.ToString());
+            }
             InitializeButtons();
             mediaPlayer = new MusicPlayer(settings);
         }
