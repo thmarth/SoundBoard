@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,9 +55,22 @@ namespace SoundBoard
 		private void UpdateComponents()
 		{
             InitializeButtons();
-
+            InitializeAudioDeviceDropdown();
             InitializeProfileDropdown();
 		}
+
+        private void InitializeAudioDeviceDropdown()
+        {
+            int index = 0;
+            comboBoxAudio.Items.Add("Default");
+            for (int i = 0; i < WaveOut.DeviceCount; i++)
+            {
+                comboBoxAudio.Items.Add(WaveOut.GetCapabilities(i).ProductName);
+                if (WaveOut.GetCapabilities(i).ProductName.Equals(settings.GetString("Audio", "DeviceName")))
+                    index = i;
+            }
+            comboBoxAudio.SelectedIndex = index + 1;
+        }
 
         private void InitializeProfileDropdown()
         {
@@ -103,9 +117,9 @@ namespace SoundBoard
 					settings.SetString(buttonName, "Foreground", editor.foregroundColor.SelectedColor.ToString());
 					settings.SetString(buttonName, "Text", editor.foregroundText.Text);
 					settings.SetString(buttonName, "File", editor.musicfileUri.Text);
-					mediaPlayer.Load(buttonName, editor.musicfileUri.Text);
-
 					settings.Save();
+                    mediaPlayer = new MusicPlayer(settings);
+
 					UpdateButton(button.Name);
 				}
 			}
@@ -152,6 +166,12 @@ namespace SoundBoard
             }
             InitializeButtons();
             mediaPlayer = new MusicPlayer(settings);
+        }
+
+        private void SetAudioDevice(object sender, EventArgs e)
+        {
+            settings.SetString("Audio", "DeviceName", (sender as ComboBox).SelectedItem.ToString());
+            mediaPlayer.SetOutputDevice((sender as ComboBox).SelectedItem.ToString());
         }
     }
 }

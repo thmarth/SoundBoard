@@ -83,6 +83,10 @@ namespace SoundBoard
                 cfg.Add(new Section("Profile"));
             cfg["Profile"] = VerifyProfile(cfg["Profile"]);
 
+            if (!cfg.Contains("Audio"))
+                cfg.Add(new Section("Audio"));
+            cfg["Audio"] = VerifyAudio(cfg["Audio"]);
+
             for (int i = 0; i < GetProfiles().Length; i++)
             {
                 for (int j = 1; j <= cfg["General"]["Rows"].IntValue; j++)
@@ -98,6 +102,14 @@ namespace SoundBoard
                 }
             }
 		}
+
+        private Section VerifyAudio(Section section)
+        {
+            if (!section.Contains("DeviceName"))
+                section.Add(new Setting("DeviceName", "Default"));
+
+            return section;
+        }
 
         internal String[] GetProfiles()
         {
