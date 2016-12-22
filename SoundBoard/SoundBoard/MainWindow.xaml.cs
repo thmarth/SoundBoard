@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,47 +54,78 @@ namespace SoundBoard
 
 		private void UpdateComponents()
 		{
-			for (int i = 1; i <= settings.GetInt("General", "Rows"); i++)
-				for (int j = 1; j <= settings.GetInt("General", "Columns"); j++)
-					UpdateButton("Button" + i + j);
+            InitializeButtons();
+            InitializeAudioDeviceDropdown();
+            InitializeProfileDropdown();
 		}
 
-		private void UpdateButton(String button)
+        private void InitializeAudioDeviceDropdown()
+        {
+            int index = 0;
+            comboBoxAudio.Items.Add("Default");
+            for (int i = 0; i < WaveOut.DeviceCount; i++)
+            {
+                comboBoxAudio.Items.Add(WaveOut.GetCapabilities(i).ProductName);
+                if (WaveOut.GetCapabilities(i).ProductName.Equals(settings.GetString("Audio", "DeviceName")))
+                    index = i;
+            }
+            comboBoxAudio.SelectedIndex = index + 1;
+        }
+
+        private void InitializeProfileDropdown()
+        {
+            comboBoxProfile.Items.Clear();
+            foreach (String profile in settings.GetProfiles())
+                comboBoxProfile.Items.Add(profile);
+            comboBoxProfile.Items.Add("<Edit...>");
+            comboBoxProfile.SelectedIndex = settings.GetInt("Profile", "Profile");
+        }
+
+        private void InitializeButtons()
+        {
+            for (int i = 1; i <= settings.GetInt("General", "Rows"); i++)
+                for (int j = 1; j <= settings.GetInt("General", "Columns"); j++)
+                    UpdateButton("Button" + i + j);
+        }
+
+        private void UpdateButton(String button)
 		{
 			Button control = (Button)this.FindName(button);
-			control.Background = settings.GetButtonBrush(button, "Background");
-			control.Foreground = settings.GetButtonBrush(button, "Foreground");
-			control.Content = settings.GetString(button, "Text");
-			control.ToolTip = settings.GetString(button, "File");
+            String buttonWithProfile = button + "P" + settings.GetString("Profile", "Profile");
+            control.Background = settings.GetButtonBrush(buttonWithProfile, "Background");
+			control.Foreground = settings.GetButtonBrush(buttonWithProfile, "Foreground");
+			control.Content = settings.GetString(buttonWithProfile, "Text");
+			control.ToolTip = settings.GetString(buttonWithProfile, "File");
 		}
 
 		private void Button_Click(object sender, RoutedEventArgs e)
 		{
 			Button button = (Button)sender;
+            String buttonName = button.Name + "P" + settings.GetString("Profile", "Profile");
 
-			if (checkBox.IsChecked == true)
+            if (checkBox.IsChecked == true)
 			{
-				ButtonEdit editor = new ButtonEdit(settings, button.Name);
+                ButtonEdit editor = new ButtonEdit(settings, buttonName);
 				editor.Owner = this;
 				if (editor.ShowDialog() == true)
 				{
 					if (editor.backgroundTypeColor.IsChecked == true)
-						settings.SetString(button.Name, "Background", editor.backgroundColor.SelectedColor.ToString());
+						settings.SetString(buttonName, "Background", editor.backgroundColor.SelectedColor.ToString());
 					else if (editor.backgroundTypeImage.IsChecked == true)
-						settings.SetString(button.Name, "Background", editor.backgroundUri.Text);
+						settings.SetString(buttonName, "Background", editor.backgroundUri.Text);
 
-					settings.SetString(button.Name, "Foreground", editor.foregroundColor.SelectedColor.ToString());
-					settings.SetString(button.Name, "Text", editor.foregroundText.Text);
-					settings.SetString(button.Name, "File", editor.musicfileUri.Text);
-					mediaPlayer.Load(button.Name, editor.musicfileUri.Text);
-
+					settings.SetString(buttonName, "Foreground", editor.foregroundColor.SelectedColor.ToString());
+					settings.SetString(buttonName, "Text", editor.foregroundText.Text);
+					settings.SetString(buttonName, "File", editor.musicfileUri.Text);
 					settings.Save();
+                    mediaPlayer = new MusicPlayer(settings);
+
 					UpdateButton(button.Name);
 				}
 			}
 			else
 			{
-				mediaPlayer.Play(button.Name);
+				mediaPlayer.Play(buttonName);
 			}
 		}
 
@@ -115,5 +147,31 @@ namespace SoundBoard
 			settings.SetDouble("Screen", "Left", this.Left);
 			settings.Save();
 		}
-	}
+
+        private void SetProfile(object sender, EventArgs e)
+        {
+            if ((sender as ComboBox).SelectedIndex == settings.GetProfiles().Length)
+            {
+                ProfileEdit profileEditor = new ProfileEdit(settings);
+                profileEditor.Owner = this;
+                profileEditor.ShowDialog();
+                settings.SetString("Profile", "Profile", 0.ToString());
+                InitializeProfileDropdown();
+                settings.Save();
+                settings = new Settings();
+            }
+            else
+            {
+                settings.SetString("Profile", "Profile", (sender as ComboBox).SelectedIndex.ToString());
+            }
+            InitializeButtons();
+            mediaPlayer = new MusicPlayer(settings);
+        }
+
+        private void SetAudioDevice(object sender, EventArgs e)
+        {
+            settings.SetString("Audio", "DeviceName", (sender as ComboBox).SelectedItem.ToString());
+            mediaPlayer.SetOutputDevice((sender as ComboBox).SelectedItem.ToString());
+        }
+    }
 }

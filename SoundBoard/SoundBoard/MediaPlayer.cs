@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NAudio.Wave;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,46 +11,66 @@ namespace SoundBoard
 {
 	class MusicPlayer
 	{
-		Dictionary<String, MediaPlayer> mediaPlayers = new Dictionary<string, MediaPlayer>();
+		private Dictionary<string, string> paths = new Dictionary<string, string>();
+        private Dictionary<string, WaveOut> players = new Dictionary<string, WaveOut>();
+        private int audioDevice;
 
-		public MusicPlayer(Settings settings)
+        public MusicPlayer(Settings settings)
 		{
 			for (int i = 1; i <= settings.GetInt("General", "Rows"); i++)
 			{
 				for (int j = 1; j <= settings.GetInt("General", "Columns"); j++)
 				{
-					mediaPlayers.Add("Button" + i + j, new MediaPlayer());
-					Load("Button" + i + j, settings.GetString("Button" + i + j, "File"));
+                    String button = "Button" + i + j + "P" + settings.GetString("Profile", "Profile");
+                    paths.Add(button, settings.GetString(button, "File"));
 				}
 			}
+            SetOutputDevice(settings.GetString("Audio", "DeviceName"));
 		}
 
 		public void Stop()
 		{
-			foreach (KeyValuePair<String, MediaPlayer> entry in mediaPlayers)
+			foreach (KeyValuePair<string, WaveOut> entry in players)
 			{
 				entry.Value.Stop();
 			}
+            players.Clear();
 		}
 
-		public void Load(String button, String path)
+        private void Stop(object sender, StoppedEventArgs e)
+        {
+            Stop();
+        }
+
+		public void Play(string button)
 		{
-			if (path != "")
+			if (paths[button] != "" && !players.ContainsKey(button))
 			{
 				try
 				{
-					mediaPlayers[button].Open(new Uri(path));
-				}
-				catch (UriFormatException)
+                    WaveOut player = new WaveOut();
+                    player.DeviceNumber = audioDevice;
+                    player.Init(new AudioFileReader(paths[button]));
+                    player.PlaybackStopped += Stop;
+                    player.Play();
+                    players.Add(button, player);
+                }
+				catch (Exception)
 				{
-					MessageBox.Show("Error loading " + path + " for " + button, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+					MessageBox.Show("Error loading " + paths[button] + " for " + button, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 				}
 			}
 		}
 
-		public void Play(String button)
-		{
-			mediaPlayers[button].Play();
-		}
-	}
+        internal bool SetOutputDevice(string name)
+        {
+            Stop();
+            int index = -1;
+            for (int i = 0; i < WaveOut.DeviceCount; i++)
+                if (WaveOut.GetCapabilities(i).ProductName.Equals(name))
+                    index = i;
+            audioDevice = index;
+            return index >= 0;
+        }
+    }
 }

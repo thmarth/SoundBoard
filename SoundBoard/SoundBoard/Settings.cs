@@ -79,20 +79,65 @@ namespace SoundBoard
 				cfg.Add(new Section("Screen"));
 			cfg["Screen"] = VerifyScreen(cfg["Screen"]);
 
-			for (int i = 1; i <= cfg["General"]["Rows"].IntValue; i++)
-			{
-				for (int j = 1; j <= cfg["General"]["Columns"].IntValue; j++)
-				{
-					String buttonName = "Button" + i + j;
-                    if (!cfg.Contains(buttonName))
-						cfg.Add(new Section(buttonName));
+            if (!cfg.Contains("Profile"))
+                cfg.Add(new Section("Profile"));
+            cfg["Profile"] = VerifyProfile(cfg["Profile"]);
 
-					cfg[buttonName] = VerifyGenericButton(cfg[buttonName]);
-				}
-			}
+            if (!cfg.Contains("Audio"))
+                cfg.Add(new Section("Audio"));
+            cfg["Audio"] = VerifyAudio(cfg["Audio"]);
+
+            for (int i = 0; i < GetProfiles().Length; i++)
+            {
+                for (int j = 1; j <= cfg["General"]["Rows"].IntValue; j++)
+                {
+                    for (int k = 1; k <= cfg["General"]["Columns"].IntValue; k++)
+                    {
+                        String buttonName = "Button" + j + k + "P" + i;
+                        if (!cfg.Contains(buttonName))
+                            cfg.Add(new Section(buttonName));
+
+                        cfg[buttonName] = VerifyGenericButton(cfg[buttonName]);
+                    }
+                }
+            }
 		}
 
-		private Section VerifyGeneral(Section section)
+        private Section VerifyAudio(Section section)
+        {
+            if (!section.Contains("DeviceName"))
+                section.Add(new Setting("DeviceName", "Default"));
+
+            return section;
+        }
+
+        internal String[] GetProfiles()
+        {
+            return cfg["Profile"]["Profiles"].GetValueArray<String>();
+        }
+
+        private Section VerifyProfile(Section section)
+        {
+            if (!section.Contains("Profile"))
+                section.Add(new Setting("Profile", "0"));
+
+            if (!section.Contains("Profiles"))
+                section.Add(new Setting("Profiles", String.Format("{{{0}}}", String.Join(", ", new String[] { "Default" }))));
+
+            return section;
+        }
+
+        internal void RenameSection(string oldName, string newName)
+        {
+            cfg[oldName].Name = newName;
+        }
+
+        internal void RemoveSection(string name)
+        {
+            cfg.Remove(name);
+        }
+
+        private Section VerifyGeneral(Section section)
 		{
 			if (!section.Contains("Rows"))
 				section.Add(new Setting("Rows", "3"));
@@ -100,7 +145,7 @@ namespace SoundBoard
 			if (!section.Contains("Columns"))
 				section.Add(new Setting("Columns", "3"));
 
-			return section;
+            return section;
 		}
 
 		private Section VerifyScreen(Section section)
